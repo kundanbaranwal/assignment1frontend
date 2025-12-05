@@ -1,0 +1,27 @@
+.invite-modal {
+  /* Uses modal-overlay and modal-content from CreateChannelModal.css */
+}
+
+.invite-modal .modal-content h2 {
+  margin-bottom: 20px;
+}
+
+.invite-modal .form-group {
+  margin-bottom: 20px;
+}
+
+.invite-modal select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+  background-color: white;
+  cursor: pointer;
+}
+
+.invite-modal select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+}
