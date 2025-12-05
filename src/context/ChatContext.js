@@ -16,7 +16,6 @@ export const ChatProvider = ({ children, token }) => {
 
   const WS_URL = process.env.REACT_APP_WS_URL || "http://localhost:5000";
 
-  // Initialize socket connection
   useEffect(() => {
     if (!token) return;
 
@@ -28,18 +27,13 @@ export const ChatProvider = ({ children, token }) => {
       reconnectionAttempts: 5,
     });
 
-    newSocket.on("connect", () => {
-      console.log("Socket connected:", newSocket.id);
-    });
+    newSocket.on("connect", () => {});
 
-    newSocket.on("error", (error) => {
-      console.error("Socket error:", error);
-    });
+    newSocket.on("error", (error) => {});
 
     newSocket.on("receive-message", (message) => {
       setMessages((prev) => {
         const updated = [...prev, { ...message, readBy: message.readBy || [] }];
-        // Update cache when new message arrives
         setCurrentChannel((ch) => {
           if (ch) {
             const cacheKey = `messages_${ch._id}`;
@@ -60,7 +54,6 @@ export const ChatProvider = ({ children, token }) => {
 
     newSocket.on("user-online", (data) => {
       setOnlineUsers((prev) => {
-        // Check if user already exists
         if (!prev.some((u) => u.userId === data.userId)) {
           return [...prev, data];
         }
@@ -102,7 +95,6 @@ export const ChatProvider = ({ children, token }) => {
       const response = await channelAPI.getChannels();
       setChannels(response.data);
     } catch (error) {
-      console.error("Failed to fetch channels:", error);
     } finally {
       setLoading(false);
     }
@@ -115,44 +107,32 @@ export const ChatProvider = ({ children, token }) => {
         const channel = await channelAPI.getChannelById(channelId);
         setCurrentChannel(channel.data);
 
-        // Check if messages are cached in localStorage
         const cacheKey = `messages_${channelId}`;
         const cachedData = localStorage.getItem(cacheKey);
 
         if (cachedData) {
-          // Load from cache first
           const cached = JSON.parse(cachedData);
           setMessages(cached);
           setMessageOffset(cached.length);
-          console.log("Loaded messages from cache:", cached.length);
         }
 
-        // Fetch fresh messages from API
         const messagesResponse = await messageAPI.getMessages(channelId);
-        console.log("Fetched messages from API:", messagesResponse.data);
         const messagesWithReadBy = messagesResponse.data.map((msg) => ({
           ...msg,
           readBy: msg.readBy || [],
         }));
-        console.log("Messages with readBy ensured:", messagesWithReadBy);
 
-        // Only update if API has more messages than cache
         const cachedLength = cachedData ? JSON.parse(cachedData).length : 0;
         if (messagesWithReadBy.length > cachedLength) {
           setMessages(messagesWithReadBy);
           setMessageOffset(messagesWithReadBy.length);
         }
 
-        // Cache messages in localStorage
         localStorage.setItem(cacheKey, JSON.stringify(messagesWithReadBy));
 
-        // Join channel via socket
         socket?.emit("join-channel", channelId);
 
-        // Clear online users when joining new channel
         setOnlineUsers([]);
-      } catch (error) {
-        console.error("Failed to select channel:", error);
       } finally {
         setLoading(false);
       }
@@ -179,7 +159,6 @@ export const ChatProvider = ({ children, token }) => {
         );
 
         if (isPrivate && members && members.length > 0) {
-          // Invite members
           for (const memberId of members) {
             await channelAPI.inviteUser(response.data.channel._id, memberId);
           }
@@ -188,7 +167,6 @@ export const ChatProvider = ({ children, token }) => {
         await fetchChannels();
         return response.data.channel;
       } catch (error) {
-        console.error("Failed to create channel:", error);
         throw error;
       }
     },
@@ -220,7 +198,6 @@ export const ChatProvider = ({ children, token }) => {
         );
         setCurrentChannel(response.data.channel);
       } catch (error) {
-        console.error("Failed to invite user:", error);
         throw error;
       }
     },
@@ -237,7 +214,6 @@ export const ChatProvider = ({ children, token }) => {
         );
         setCurrentChannel(response.data.channel);
       } catch (error) {
-        console.error("Failed to remove user:", error);
         throw error;
       }
     },
@@ -256,17 +232,10 @@ export const ChatProvider = ({ children, token }) => {
 
   const markMessageAsRead = useCallback(async (messageId) => {
     try {
-      console.log("=== MARKING MESSAGE AS READ ===");
-      console.log("Message ID:", messageId);
       const response = await messageAPI.markAsRead(messageId);
-      console.log("Full API Response:", response);
-      console.log("Response data:", response.data);
 
-      // Update the message in state with the readBy data from the server
       if (response.data && response.data.data) {
         const updatedMessage = response.data.data;
-        console.log("Updated message with readBy:", updatedMessage);
-        console.log("ReadBy array:", updatedMessage.readBy);
 
         setMessages((prev) => {
           const updated = prev.map((msg) =>
@@ -274,15 +243,11 @@ export const ChatProvider = ({ children, token }) => {
               ? { ...msg, readBy: updatedMessage.readBy || [] }
               : msg
           );
-          console.log("Updated messages state:", updated);
           return updated;
         });
       } else {
-        console.error("Invalid response structure:", response.data);
       }
-    } catch (error) {
-      console.error("Failed to mark message as read:", error);
-    }
+    } catch (error) {}
   }, []);
 
   const loadMoreMessages = useCallback(async () => {
@@ -299,16 +264,13 @@ export const ChatProvider = ({ children, token }) => {
         }));
         setMessages((prev) => {
           const updated = [...messagesWithReadBy, ...prev];
-          // Cache updated messages in localStorage
           const cacheKey = `messages_${currentChannel._id}`;
           localStorage.setItem(cacheKey, JSON.stringify(updated));
           return updated;
         });
         setMessageOffset((prev) => prev + messagesWithReadBy.length);
       }
-    } catch (error) {
-      console.error("Failed to load message history:", error);
-    }
+    } catch (error) {}
   }, [currentChannel, messageOffset]);
   return (
     <ChatContext.Provider

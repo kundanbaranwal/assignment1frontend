@@ -7,7 +7,6 @@ const instance = axios.create({
   withCredentials: true,
 });
 
-// Add JWT token to all requests
 instance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("authToken");
@@ -19,7 +18,6 @@ instance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Auth API
 export const authAPI = {
   register: (username, email, password) =>
     instance.post("/auth/register", { username, email, password }),
@@ -28,7 +26,6 @@ export const authAPI = {
   getAllUsers: () => instance.get("/auth/users"),
 };
 
-// Channel API
 export const channelAPI = {
   createChannel: (name, description, isPrivate, members) =>
     instance.post("/channels", { name, description, isPrivate, members }),
@@ -41,7 +38,6 @@ export const channelAPI = {
   deleteChannel: (id) => instance.delete(`/channels/${id}`),
 };
 
-// Message API
 export const messageAPI = {
   getMessages: (channelId) => instance.get(`/messages/${channelId}`),
   sendMessage: (content, channelId) =>

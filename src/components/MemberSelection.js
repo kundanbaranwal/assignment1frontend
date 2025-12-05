@@ -13,7 +13,6 @@ const MemberSelection = ({ selectedMembers, onMembersChange }) => {
         setUsers(response.data);
         setLoading(false);
       } catch (error) {
-        console.error("Failed to fetch users:", error);
         setLoading(false);
       }
     };

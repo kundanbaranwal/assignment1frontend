@@ -14,7 +14,6 @@ const InviteModal = ({ onClose, channelId, channelMembers = [] }) => {
     const fetchUsers = async () => {
       try {
         const response = await authAPI.getAllUsers();
-        // Filter out users who are already members
         const memberIds = channelMembers.map((m) => m._id);
         const availableUsers = response.data.filter(
           (user) => !memberIds.includes(user._id)
@@ -22,7 +21,6 @@ const InviteModal = ({ onClose, channelId, channelMembers = [] }) => {
         setUsers(availableUsers);
         setLoading(false);
       } catch (error) {
-        console.error("Failed to fetch users:", error);
         setError("Failed to load users");
         setLoading(false);
       }
@@ -44,7 +42,6 @@ const InviteModal = ({ onClose, channelId, channelMembers = [] }) => {
       await channelAPI.inviteUser(channelId, selectedUser);
       setMessage("User invited successfully!");
       setSelectedUser("");
-      // Refresh users list
       const response = await authAPI.getAllUsers();
       const memberIds = channelMembers.map((m) => m._id);
       const updatedUsers = response.data.filter(

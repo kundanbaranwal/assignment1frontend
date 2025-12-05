@@ -32,7 +32,6 @@ const ChatWindow = () => {
     scrollToBottom();
   }, [messages]);
 
-  // Mark messages as read when they appear
   useEffect(() => {
     const currentUserId = localStorage.getItem("userId");
     messages.forEach((message) => {
@@ -50,15 +49,12 @@ const ChatWindow = () => {
   const handleInputChange = (e) => {
     setMessageInput(e.target.value);
 
-    // Send typing indicator
     sendTyping();
 
-    // Clear existing timeout
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
 
-    // Set new timeout for stop typing
     typingTimeoutRef.current = setTimeout(() => {
       sendStopTyping();
     }, 3000);
@@ -89,7 +85,6 @@ const ChatWindow = () => {
       await fetchChannels();
       selectChannel(null);
     } catch (error) {
-      console.error("Error deleting channel:", error);
       alert("Failed to delete channel");
     } finally {
       setLoading(false);
@@ -119,7 +114,6 @@ const ChatWindow = () => {
               <button
                 className="invite-btn"
                 onClick={() => setShowInviteModal(true)}
-                title="Invite members to this channel"
               >
                 👥 Invite
               </button>
@@ -128,7 +122,6 @@ const ChatWindow = () => {
               className="delete-btn"
               onClick={handleDeleteChannel}
               disabled={loading}
-              title="Delete this channel"
             >
               🗑️ Delete
             </button>
@@ -138,31 +131,16 @@ const ChatWindow = () => {
 
       <div className="messages-container">
         {messages.length > 0 && (
-          <button
-            className="load-more-btn"
-            onClick={loadMoreMessages}
-            title="Load older messages"
-          >
+          <button className="load-more-btn" onClick={loadMoreMessages}>
             ⬆️ Load More
           </button>
         )}
         {messages.map((message) => {
-          // Ensure readBy is always an array
           const readByArray = Array.isArray(message.readBy)
             ? message.readBy
             : [];
           const isMessageRead = readByArray.length > 0;
           const readCount = readByArray.length;
-
-          // Debug logging
-          if (isMessageRead) {
-            console.log("Message with read receipts:", {
-              messageId: message._id,
-              content: message.content,
-              readBy: readByArray,
-              readCount,
-            });
-          }
 
           return (
             <div key={message._id} className="message">
